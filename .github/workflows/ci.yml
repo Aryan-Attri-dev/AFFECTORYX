@@ -9,7 +9,7 @@ on:
 jobs:
   security-audit:
     name: Secrets & Credentials Audit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.12"
 
       - name: Verify No Secrets Committed
         run: |
@@ -31,7 +31,7 @@ jobs:
 
   backend-tests:
     name: Backend Test Suite & Isolation Verification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: security-audit
     env:
       ENVIRONMENT: test
@@ -44,7 +44,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.12"
 
       - name: Install Dependencies
         run: |
