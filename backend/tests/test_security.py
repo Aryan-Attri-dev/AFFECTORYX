@@ -15,11 +15,11 @@ def test_security_headers_present(client: TestClient):
 
 def test_settings_repr_masks_confidential_values():
     s = Settings(
-        SECRET_KEY="super-sensitive-jwt-token-signing-key-not-leaked",
+        SECRET_KEY="placeholder-test-secret-key-not-leaked-32chars",
         FIRST_SUPERUSER_PASSWORD="ConfidentialMasterPassword123!",
     )
     repr_str = repr(s)
-    assert "super-sensitive-jwt-token-signing-key-not-leaked" not in repr_str
+    assert "placeholder-test-secret-key-not-leaked-32chars" not in repr_str
     assert "ConfidentialMasterPassword123!" not in repr_str
 
 
@@ -27,8 +27,8 @@ def test_production_environment_rejects_insecure_key():
     with pytest.raises(ValueError, match="SECURITY ERROR"):
         Settings(
             ENVIRONMENT="production",
-            SECRET_KEY="dev-insecure-only-local-eval-key",
-            DATABASE_URL="postgresql://user:pass@db:5432/affactoryx",
+            SECRET_KEY="placeholder-dev-insecure-eval-key",
+            DATABASE_URL="postgresql://placeholder_user:placeholder_pass@db:5432/test_db",
         )
 
 

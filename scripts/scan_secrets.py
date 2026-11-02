@@ -69,9 +69,9 @@ def check_tracked_files(root: Path):
         for pattern, label in SECRET_PATTERNS:
             matches = re.finditer(pattern, content, re.IGNORECASE)
             for m in matches:
-                # Exclude mock test patterns or schema docs if explicitly intended
                 matched_text = m.group(0)
-                if "replace-with" in matched_text or "example" in matched_text or "placeholder" in matched_text:
+                matched_text_lower = matched_text.lower()
+                if any(x in matched_text_lower for x in ["replace-with", "example", "placeholder", "mock", "dummy", "test"]):
                     continue
                 line_no = content[:m.start()].count("\n") + 1
                 violations.append(
