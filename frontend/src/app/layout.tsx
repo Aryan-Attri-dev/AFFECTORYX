@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/context/auth-context";
+import { Footer } from "@/components/navigation/footer";
 
 export const metadata: Metadata = {
   title: "AFFECTORYX — Engineering Intelligence Platform",
@@ -15,7 +16,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark bg-[#0b0f17] text-gray-100">
       <body className="min-h-screen bg-[#0b0f17] text-gray-100 flex flex-col font-sans">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <div className="flex flex-col min-h-screen">
+            <div className="flex-1 flex flex-col">{children}</div>
+            <Footer />
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

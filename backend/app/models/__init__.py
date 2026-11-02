@@ -15,6 +15,14 @@ from app.models.graph import (
     EvidenceRecord,
     CustomerMapping,
 )
+from app.models.analysis import (
+    ChangeSeverity,
+    BreakingCategory,
+    RiskLevel,
+    DeploymentVerdict,
+    ChangeAnalysis,
+    SimulationReport,
+)
 
 __all__ = [
     "Base",
@@ -35,4 +43,10 @@ __all__ = [
     "GraphEdge",
     "EvidenceRecord",
     "CustomerMapping",
+    "ChangeSeverity",
+    "BreakingCategory",
+    "RiskLevel",
+    "DeploymentVerdict",
+    "ChangeAnalysis",
+    "SimulationReport",
 ]

@@ -161,3 +161,81 @@ export interface CustomerMapping {
   created_at: string;
   updated_at: string;
 }
+
+// Phase 3: Change Analyzer & Impact Simulator Types
+export type ChangeSeverity = "NON_BREAKING" | "POTENTIALLY_BREAKING" | "BREAKING";
+
+export type BreakingCategory =
+  | "REMOVED_ENDPOINT"
+  | "REMOVED_METHOD"
+  | "CHANGED_REQUEST_SCHEMA"
+  | "CHANGED_RESPONSE_SCHEMA"
+  | "REMOVED_REQUIRED_FIELD"
+  | "ADDED_REQUIRED_FIELD"
+  | "CHANGED_TYPE"
+  | "CHANGED_STATUS_CODE"
+  | "SQL_COLUMN_DROPPED"
+  | "SQL_TABLE_DROPPED"
+  | "SQL_TYPE_ALTERED"
+  | "SQL_NOT_NULL_ADDED"
+  | "UNKNOWN";
+
+export type RiskLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
+export type DeploymentVerdict = "SAFE" | "SAFE_WITH_MITIGATION" | "BLOCKED";
+
+export interface ChangeFinding {
+  severity: ChangeSeverity;
+  category: BreakingCategory;
+  target: string;
+  description: string;
+  evidence: string;
+  safe_migration_advice?: string;
+  provenance: string;
+}
+
+export interface ChangeAnalysisResponse {
+  id: string;
+  organization_id: string;
+  project_id: string;
+  title: string;
+  analysis_type: string;
+  base_version: string;
+  target_version: string;
+  breaking_count: number;
+  non_breaking_count: number;
+  findings: ChangeFinding[];
+  metadata_info: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface AffectedCustomer {
+  customer_name: string;
+  tier: string;
+  contract_sla: string;
+  impacted_endpoints: string[];
+  impacted_workflows: string[];
+}
+
+export interface SimulationReportResponse {
+  id: string;
+  organization_id: string;
+  project_id: string;
+  analysis_id?: string;
+  target_component_id: string;
+  target_component_name: string;
+  risk_level: RiskLevel;
+  verdict: DeploymentVerdict;
+  canonical_verdict?: string;
+  summary: string;
+  directly_affected_services: string[];
+  transitive_affected_services: string[];
+  affected_customers: AffectedCustomer[];
+  spof_identified: string[];
+  has_unknown_dependencies: boolean;
+  verification_checklist: string[];
+  markdown_report: string;
+  report_details: Record<string, unknown>;
+  created_at: string;
+}
+

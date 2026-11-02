@@ -228,6 +228,41 @@ export default function SettingsPage() {
                   </form>
                 )}
               </div>
+
+              {/* About AFFECTORYX Section */}
+              <div className="enterprise-card p-5 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-[#1f2937]">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-7 h-7 rounded bg-[#10b981]/10 border border-[#10b981]/30 flex items-center justify-center text-[#10b981] font-mono font-bold text-xs">
+                      AX
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-100">About AFFECTORYX</h3>
+                      <p className="text-xs text-gray-400 mt-0.5">Platform engineering specification & provenance.</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-[#111827] border border-[#1f2937] text-gray-400 font-mono">
+                    Enterprise Edition
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1">
+                  <div>
+                    <label className="text-gray-500 font-mono block mb-1">Product</label>
+                    <div className="font-bold text-gray-100 tracking-wide text-sm">AFFECTORYX</div>
+                  </div>
+                  <div>
+                    <label className="text-gray-500 font-mono block mb-1">Developer</label>
+                    <div className="font-semibold text-emerald-400">Aryan Attri</div>
+                  </div>
+                  <div className="md:col-span-2 pt-2 border-t border-[#1f2937]/50">
+                    <label className="text-gray-500 font-mono block mb-1">Tagline</label>
+                    <p className="text-xs text-gray-200 font-medium italic">
+                      &ldquo;Understand Every Change. Before It Impacts Anyone.&rdquo;
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
