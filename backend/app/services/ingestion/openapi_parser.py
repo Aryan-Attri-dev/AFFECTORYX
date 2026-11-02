@@ -19,13 +19,24 @@ class OpenAPIParser:
     def parse_content(content_str: str) -> Dict[str, Any]:
         """Safely parse OpenAPI spec in JSON or YAML format without executing code."""
         content_str = content_str.strip()
+        if not content_str:
+            raise HTTPException(status_code=400, detail="OpenAPI specification cannot be empty")
+
         if content_str.startswith("{"):
             try:
-                return json.loads(content_str)
+                parsed = json.loads(content_str)
+                if not isinstance(parsed, dict):
+                    raise HTTPException(status_code=400, detail="OpenAPI specification must be a JSON object mapping")
+                return parsed
             except json.JSONDecodeError as e:
                 raise HTTPException(status_code=400, detail=f"Invalid JSON OpenAPI specification: {str(e)}")
         try:
-            return yaml.safe_load(content_str)
+            parsed = yaml.safe_load(content_str)
+            if not isinstance(parsed, dict):
+                raise HTTPException(status_code=400, detail="OpenAPI specification must be a YAML object mapping")
+            return parsed
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid YAML OpenAPI specification: {str(e)}")
 
