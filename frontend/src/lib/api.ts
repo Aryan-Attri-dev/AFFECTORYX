@@ -14,6 +14,9 @@ import {
   ChangeAnalysisResponse,
   SimulationReportResponse,
   ChangeFinding,
+  OpenAPIIngestionSummary,
+  CodeASTIngestionSummary,
+  SQLMigrationIngestionSummary,
 } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -205,22 +208,22 @@ class ApiClient {
     return this.request<DownstreamImpactResult>(`/projects/${projectId}/graph/impact?start_node_id=${startNodeId}`);
   }
 
-  async ingestOpenAPI(projectId: string, specContent: string, specSourceName = "openapi.json"): Promise<any> {
-    return this.request<any>(`/projects/${projectId}/ingest/openapi`, {
+  async ingestOpenAPI(projectId: string, specContent: string, specSourceName = "openapi.json"): Promise<OpenAPIIngestionSummary> {
+    return this.request<OpenAPIIngestionSummary>(`/projects/${projectId}/ingest/openapi`, {
       method: "POST",
       body: JSON.stringify({ spec_content: specContent, spec_source_name: specSourceName }),
     });
   }
 
-  async ingestCodeAST(projectId: string, callerServiceName: string, filePath: string, codeContent: string): Promise<any> {
-    return this.request<any>(`/projects/${projectId}/ingest/code`, {
+  async ingestCodeAST(projectId: string, callerServiceName: string, filePath: string, codeContent: string): Promise<CodeASTIngestionSummary> {
+    return this.request<CodeASTIngestionSummary>(`/projects/${projectId}/ingest/code`, {
       method: "POST",
       body: JSON.stringify({ caller_service_name: callerServiceName, file_path: filePath, code_content: codeContent }),
     });
   }
 
-  async ingestSQLMigration(projectId: string, migrationFilename: string, sqlContent: string): Promise<any> {
-    return this.request<any>(`/projects/${projectId}/ingest/migration`, {
+  async ingestSQLMigration(projectId: string, migrationFilename: string, sqlContent: string): Promise<SQLMigrationIngestionSummary> {
+    return this.request<SQLMigrationIngestionSummary>(`/projects/${projectId}/ingest/migration`, {
       method: "POST",
       body: JSON.stringify({ migration_filename: migrationFilename, sql_content: sqlContent }),
     });

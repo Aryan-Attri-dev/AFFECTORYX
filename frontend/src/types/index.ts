@@ -137,6 +137,30 @@ export interface TopologyGraphResponse {
   metrics: GraphMetrics;
 }
 
+export interface OpenAPIIngestionSummary {
+  title: string;
+  version: string;
+  endpoints_discovered: number;
+  schemas_discovered: number;
+  edges_created: number;
+  evidence_records_created: number;
+}
+
+export interface CodeASTIngestionSummary {
+  files_analyzed: number;
+  callsites_discovered: number;
+  service_dependencies_discovered: number;
+  edges_created: number;
+  unknown_routes_flagged: number;
+}
+
+export interface SQLMigrationIngestionSummary {
+  tables_created: number;
+  tables_modified: number;
+  destructive_operations: string[];
+  edges_created: number;
+}
+
 export interface DownstreamImpactResult {
   root_node_id: string;
   root_node_name: string;

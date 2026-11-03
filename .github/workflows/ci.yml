@@ -2,7 +2,7 @@ name: AFFECTORYX CI & Security Audit
 
 on:
   push:
-    branches: [main, master, develop]
+    branches: [main, master, develop, "remediation/*"]
   pull_request:
     branches: [main, master]
 
@@ -55,3 +55,95 @@ jobs:
         run: |
           cd backend
           pytest -v
+
+  frontend-verification:
+    name: Frontend Lint, Typecheck & Production Build
+    runs-on: ubuntu-24.04
+    needs: security-audit
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run ESLint
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Run TypeScript Typecheck
+        run: |
+          cd frontend
+          npx tsc --noEmit
+
+      - name: Build Production Frontend
+        run: |
+          cd frontend
+          npm run build
+
+  e2e-tests:
+    name: End-to-End Multi-Viewport Lifecycle
+    runs-on: ubuntu-24.04
+    needs: [backend-tests, frontend-verification]
+    env:
+      ENVIRONMENT: development
+      SECRET_KEY: 'ci-e2e-test-secure-key-affactoryx-long-secret-key-32ch'
+      DATABASE_URL: sqlite:///./ci_e2e_affactoryx.db
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:8000/api/v1
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          pip install playwright pytest-playwright
+          cd frontend
+          npm ci
+          npm run build
+
+      - name: Install Playwright Browsers
+        run: |
+          playwright install --with-deps chromium
+
+      - name: Start Backend Server
+        run: |
+          cd backend
+          alembic upgrade head
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          sleep 4
+          curl -s http://127.0.0.1:8000/health
+
+      - name: Start Frontend Server
+        run: |
+          cd frontend
+          npm run start -- -p 3000 &
+          sleep 4
+          curl -sI http://localhost:3000/login
+
+      - name: Run Phase 1 & Phase 2 Playwright E2E Tests
+        run: |
+          python3 tests/e2e/test_phase1_e2e.py
+          python3 tests/e2e/test_phase2_e2e.py

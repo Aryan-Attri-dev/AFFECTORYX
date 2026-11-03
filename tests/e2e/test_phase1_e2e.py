@@ -25,7 +25,8 @@ def test_full_phase1_lifecycle():
             page.goto("http://localhost:3000")
             page.wait_for_selector("text=AFFECTORYX")
             expect(page.locator("text=AFFECTORYX").first).to_be_visible()
-            expect(page.locator("text=ENGINEERING INTELLIGENCE PLATFORM")).to_be_visible()
+            expect(page.locator("p:has-text('ENGINEERING INTELLIGENCE PLATFORM')")).to_be_visible()
+            expect(page.locator("footer:has-text('Aryan Attri')")).to_be_visible()
             page.screenshot(path=f"{SCREENSHOT_DIR}/01_login_page_{vp['name']}.png")
 
             # 2. Switch to NEW WORKSPACE tab
