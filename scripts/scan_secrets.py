@@ -28,35 +28,95 @@ ALLOWED_FILES = {
 }
 
 
+def is_file_tracked(root: Path, rel_path: str) -> bool:
+    try:
+        res = subprocess.run(
+            ["git", "ls-files", "--error-unmatch", rel_path],
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+        )
+        return res.returncode == 0
+    except Exception:
+        return False
+
+
+def is_file_gitignored(root: Path, rel_path: str) -> bool:
+    try:
+        res = subprocess.run(
+            ["git", "check-ignore", "-q", rel_path],
+            cwd=str(root),
+            capture_output=True,
+        )
+        return res.returncode == 0
+    except Exception:
+        # Fallback if git is unavailable: check .gitignore directly
+        gitignore = root / ".gitignore"
+        if gitignore.is_file():
+            patterns = [line.strip() for line in gitignore.read_text().splitlines() if line.strip() and not line.startswith("#")]
+            return any(p in rel_path or rel_path == p.lstrip("/") for p in patterns)
+        return False
+
+
 def check_env_files(root: Path):
     violations = []
     for p in root.rglob(".env*"):
         rel = str(p.relative_to(root))
         if rel in ALLOWED_FILES:
             continue
-        if "node_modules" in rel or ".venv" in rel:
+        if "node_modules" in rel or ".venv" in rel or ".git" in rel:
             continue
-        violations.append(f"Forbidden environment file found in filesystem: {rel}")
+
+        # 1. Strictly forbid any .env file tracked in git
+        if is_file_tracked(root, rel):
+            violations.append(
+                f"CRITICAL SECURITY VIOLATION: Environment file '{rel}' is TRACKED in git. Remove it immediately with 'git rm --cached {rel}'."
+            )
+        # 2. Forbid any .env file that is untracked and NOT ignored
+        elif not is_file_gitignored(root, rel):
+            violations.append(
+                f"SECURITY VIOLATION: Environment file '{rel}' is present and NOT protected by .gitignore. Add it to .gitignore immediately."
+            )
+        else:
+            # Safely ignored local developer file
+            pass
+
     return violations
 
 
-def check_tracked_files(root: Path):
+def check_tracked_and_staged_files(root: Path):
     violations = []
+    tracked_or_untracked = []
+
     try:
+        # 1. All tracked files
         tracked = subprocess.check_output(
             ["git", "ls-files"], cwd=str(root), text=True
         ).splitlines()
+        tracked_or_untracked.extend(tracked)
+
+        # 2. Untracked files that are NOT ignored
+        untracked = subprocess.check_output(
+            ["git", "status", "--porcelain"], cwd=str(root), text=True
+        ).splitlines()
+        for line in untracked:
+            if line.startswith("?? "):
+                file_rel = line[3:].strip()
+                if not is_file_gitignored(root, file_rel):
+                    tracked_or_untracked.append(file_rel)
     except Exception:
-        # Not a git repo yet or no commits
-        tracked = [
+        tracked_or_untracked = [
             str(p.relative_to(root))
             for p in root.rglob("*")
             if p.is_file() and not any(part in p.parts for part in [".git", "node_modules", ".venv"])
         ]
 
-    for rel_path in tracked:
+    for rel_path in set(tracked_or_untracked):
         if rel_path in ALLOWED_FILES:
             continue
+        if any(part in rel_path for part in [".git", "node_modules", ".venv", ".pytest_cache", ".next"]):
+            continue
+
         file_path = root / rel_path
         if not file_path.is_file():
             continue
@@ -86,7 +146,7 @@ def main():
     print(f"[*] Scanning AFFECTORYX workspace at: {root}")
 
     env_violations = check_env_files(root)
-    content_violations = check_tracked_files(root)
+    content_violations = check_tracked_and_staged_files(root)
 
     all_violations = env_violations + content_violations
 

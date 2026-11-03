@@ -2,7 +2,12 @@ import os
 import time
 from playwright.sync_api import sync_playwright, expect
 
-SCREENSHOT_DIR = "/Users/botdigit/.gemini/antigravity-ide/brain/641a330a-6d90-4b8b-8e8f-f0b25ab8dd06/e2e_screenshots"
+SCREENSHOT_DIR = os.getenv(
+    "SCREENSHOT_DIR",
+    "/Users/botdigit/.gemini/antigravity-ide/brain/641a330a-6d90-4b8b-8e8f-f0b25ab8dd06/e2e_screenshots"
+    if os.path.exists("/Users/botdigit")
+    else os.path.abspath("e2e_screenshots"),
+)
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
 VIEWPORTS = [
@@ -25,7 +30,8 @@ def test_full_phase1_lifecycle():
             page.goto("http://localhost:3000")
             page.wait_for_selector("text=AFFECTORYX")
             expect(page.locator("text=AFFECTORYX").first).to_be_visible()
-            expect(page.locator("text=ENGINEERING INTELLIGENCE PLATFORM")).to_be_visible()
+            expect(page.locator("p:has-text('ENGINEERING INTELLIGENCE PLATFORM')")).to_be_visible()
+            expect(page.locator("footer:has-text('Aryan Attri')")).to_be_visible()
             page.screenshot(path=f"{SCREENSHOT_DIR}/01_login_page_{vp['name']}.png")
 
             # 2. Switch to NEW WORKSPACE tab
