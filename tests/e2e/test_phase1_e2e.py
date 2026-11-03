@@ -2,7 +2,12 @@ import os
 import time
 from playwright.sync_api import sync_playwright, expect
 
-SCREENSHOT_DIR = "/Users/botdigit/.gemini/antigravity-ide/brain/641a330a-6d90-4b8b-8e8f-f0b25ab8dd06/e2e_screenshots"
+SCREENSHOT_DIR = os.getenv(
+    "SCREENSHOT_DIR",
+    "/Users/botdigit/.gemini/antigravity-ide/brain/641a330a-6d90-4b8b-8e8f-f0b25ab8dd06/e2e_screenshots"
+    if os.path.exists("/Users/botdigit")
+    else os.path.abspath("e2e_screenshots"),
+)
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
 VIEWPORTS = [

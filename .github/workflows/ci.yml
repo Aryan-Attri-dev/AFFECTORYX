@@ -131,8 +131,8 @@ jobs:
       - name: Start Backend Server
         run: |
           cd backend
-          alembic upgrade head
-          uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          python -m alembic upgrade head
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 &
           sleep 4
           curl -s http://127.0.0.1:8000/health
 
